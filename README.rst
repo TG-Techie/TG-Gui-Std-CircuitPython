@@ -39,7 +39,7 @@ and TG-Gui-Core .
 Usage Example
 =============
 
-.. code-block:: python
+.. code-block::python
     import time
     
     from tg_gui_std import *
