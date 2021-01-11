@@ -17,7 +17,8 @@ Introduction
     :target: https://github.com/psf/black
     :alt: Code Style: Black
 
-An implementation of the TG-Gui standard library using displayio as a backend for easy embedded GUIs
+An implementation of the TG-Gui standard library using displayio as a backend for easy embedded GUIs. 
+This supplies a bunch for useful widgets like buttons, sliders, and labels that inegrate with circuitpython's native UI library.
 
 
 Dependencies
@@ -38,16 +39,34 @@ and TG-Gui-Core .
 Usage Example
 =============
 
-.. todo:: Add a quick, simple example. It and other examples should live in the examples folder and be included in docs/examples.rst.
+.. code-block:: python
+    import time
+    
+    from tg_gui_std import *
+    from <some startup code> import mainapp, run_even_loop
+    
+    @mainapp
+    class my_app(Layout):
+    
+        button = Button(text="Press me...", press=self.on_press)
+        
+        def _any_(self): 
+            self.button((0, center), (self.width, self.height//4)
+        
+        def on_press(self):
+            print("pressed!", time.monotonic())
+           
+         def _loop_(self):
+            pass
 
 Contributing
 ============
 
-Contributions are welcome! Please read our `Code of Conduct
+Contributions are welcome! Please read the circuitpython `Code of Conduct
 <https://github.com/TG-Techie/TG-Gui-Std-CircuitPython/blob/master/CODE_OF_CONDUCT.md>`_
 before contributing to help this project stay welcoming.
 
 Documentation
 =============
 
-For information on building library documentation, please check out `this guide <https://learn.adafruit.com/creating-and-sharing-a-circuitpython-library/sharing-our-docs-on-readthedocs#sphinx-5-1>`_.
+For information on building library documentation, please check out `adafruit's guide <https://learn.adafruit.com/creating-and-sharing-a-circuitpython-library/sharing-our-docs-on-readthedocs#sphinx-5-1>`_.
