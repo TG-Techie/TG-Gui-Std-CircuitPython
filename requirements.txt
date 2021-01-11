@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: 2017 Scott Shawcroft, written for Adafruit Industries
+# SPDX-FileCopyrightText: Copyright (c) 2021 Jonah Yolles-Murphy for TG-Techie
+#
+# SPDX-License-Identifier: MIT
+
+Adafruit-Blinka
+adafruit-circuitpython-display-text
+adafruit-circuitpython-display-shapes
+adafruit-circuitpython-progressbar
