@@ -23,9 +23,8 @@
 from tg_gui_core import *
 from . import _imple as imple
 
+
 class ProgressBar(Widget):
-
-
     def __init__(self, *, progress, palette=None, _fill_space=False, **kwargs):
         super().__init__(**kwargs)
 
@@ -42,7 +41,7 @@ class ProgressBar(Widget):
 
         self._group = imple.Group(max_size=2)
 
-        radius = self._phys_height_//2
+        radius = self._phys_height_ // 2
 
         if self._fill_space:
             self._group = group = imple.ProgressBar(
@@ -53,10 +52,10 @@ class ProgressBar(Widget):
             )
         else:
             self._group = group = imple.ProgressBar(
-                x = self._rel_x_+radius,
-                y = self._rel_y_ + self._phys_height_//2 - 6,
-                width = self._phys_width_-2*radius,
-                height = 12,
+                x=self._rel_x_ + radius,
+                y=self._rel_y_ + self._phys_height_ // 2 - 6,
+                width=self._phys_width_ - 2 * radius,
+                height=12,
                 progress=0.0,
                 stroke=1,
                 bar_color=self._palette.fill_color,
@@ -68,9 +67,10 @@ class ProgressBar(Widget):
 
     def _update_progress(self):
         if self.isplaced():
-            self._group.progress = min(max(0.0, src_to_value(
+            value = src_to_value(
                 src=self._prog_src,
                 widget=self,
                 handler=self._update_progress,
-                default=0.0
-            )), 1.0)
+                default=0.0,
+            )
+            self._group.progress = clip(0.0, value, 1.0)

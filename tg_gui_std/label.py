@@ -23,12 +23,10 @@
 from tg_gui_core import *
 from . import _imple as imple
 
-class Label(Widget):
 
-    def __init__(self, *,
-        text, size=None, palette=None,
-        _alignment=align.center,
-        **kwargs
+class Label(Widget):
+    def __init__(
+        self, *, text, size=None, palette=None, _alignment=align.center, **kwargs
     ):
         super().__init__(**kwargs)
         self._text_src = text
@@ -37,6 +35,9 @@ class Label(Widget):
         self._size = size
 
     def _on_nest_(self):
+        """
+        Resolve defaults for any inputs if no input was provided.
+        """
         screen = self._screen_
 
         if self._size is None:
@@ -50,30 +51,23 @@ class Label(Widget):
 
         super()._place_(coord, dims)
 
-        palette = self._palette
-
         self._group = group = imple.Label(
-            text=' ',
-            color=palette.text_color,
+            text=" ",
+            color=self._palette.text_color,
             coord=self._rel_coord_,
             dims=self._phys_dims_,
-            alignment = self._alignment,
+            alignment=self._alignment,
             scale=self._size,
         )
-
 
     def _render_(self):
         self._update_text()
         super()._render_()
 
-    # #@micropython.native
     def _update_text(self):
-        text = src_to_value(
+        self._group.text = src_to_value(
             src=self._text_src,
             widget=self,
             handler=self._update_text,
-            default=' ',
+            default=" ",
         )
-        # print(self._text_src)
-        # print(self, repr(text), type(text))
-        self._group.text = text

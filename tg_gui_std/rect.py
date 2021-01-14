@@ -23,8 +23,8 @@
 from tg_gui_core import *
 from . import _imple as imple
 
-class Rect(Widget):
 
+class Rect(Widget):
     def __init__(self, radius=None, fill=None, **kwargs):
         super().__init__(**kwargs)
 
@@ -40,7 +40,7 @@ class Rect(Widget):
         if isinstance(radius, DimensionSpecifier):
             radius = radius._calc_dim_()
 
-        self._radius = min(radius, self.width//2, self.height//2)
+        self._radius = min(radius, self.width // 2, self.height // 2)
 
         self._group = imple.RoundRect(
             *self._rel_placement_,
@@ -52,10 +52,8 @@ class Rect(Widget):
         super()._render_()
 
     def _update_color(self):
-
         fill = self._fill_src
-        # if isinstance(fill, StatefulAttribute):
-        #     raise NotImplementedError
+
         if fill is None:
             fill = self._screen_.default._fill_color_
         elif isinstance(fill, State):

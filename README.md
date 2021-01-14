@@ -26,10 +26,10 @@ and the gui core from [TG-Gui-Core](https://github.com/TG-Techie/TG-Gui-Core).
 ## Usage Example
 
 ```python
-from tg_gui_std import *
-from <some startup module> import mainapp, run_even_loop
+from tg_gui_std.all import *
+from <some startup module> import appwrapper, run_even_loop
 
-@mainapp
+@appwrapper
 class my_app(Layout):
 
     button = Button(text="Press me...", press=self.on_press)

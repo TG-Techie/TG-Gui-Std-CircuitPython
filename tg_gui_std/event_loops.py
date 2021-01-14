@@ -22,23 +22,24 @@
 
 from tg_gui_core import *
 
+
 def adjust_phys_to_rel(ref_wid, coord):
     x, y = coord
     px, py = ref_wid._phys_coord_
     return (x - px, y - py)
 
-class SinglePointEventLoop():
 
+class SinglePointEventLoop:
     def __init__(self, *, screen, update_coord):
         self._update_coord = update_coord
         self._screen = screen
 
         # initial state of the loop
         self._was_touched = False
-        self._last_coord = (-0x1701d, -0x1701d)
+        self._last_coord = (-0x1701D, -0x1701D)  # ;-)
         self._selected = None
+        self._supports_updating = False
 
-    # #@micropython.native
     def loop(self):
 
         # get previous data
@@ -49,7 +50,7 @@ class SinglePointEventLoop():
         coord = self._update_coord()
         is_touched = bool(coord is not None)
 
-        if is_touched and not was_touched: # if finger down
+        if is_touched and not was_touched:  # if finger down
             # print('event_loop', coord)
             # scan thought all pointable widgets
             for widget in self._screen._pressables_:
@@ -59,19 +60,25 @@ class SinglePointEventLoop():
                     widget._select_(adjust_phys_to_rel(widget, coord))
                     # save this widget for the next
                     self._selected = widget
+                    self._supports_updating = hasattr(widget, "_update_coord_")
                     break
-        elif not is_touched and was_touched: # if finger raised
-
+        elif not is_touched and was_touched:  # if finger raised
+            selected = self._selected
+            # if an item is selected
+            if selected is not None:
+                # than deselect it
+                selected._deselect_(adjust_phys_to_rel(selected, last_coord))
+                # if the widget can be pressed, press it
+                if selected._has_phys_coord_in_(last_coord) and hasattr(
+                    selected, "_press_"
+                ):
+                    selected._press_()
+                # remove the reference to it
+                self._selected = None
+                self._supports_updating = False
+        elif is_touched and self._supports_updating:  # than update it
             selected = self._selected
             if selected is not None:
-                #selected._selected_ = False
-                selected._deselect_(adjust_phys_to_rel(selected, last_coord))
-                if selected._has_phys_coord_in_(last_coord) and hasattr(selected, '_press_'):
-                     selected._press_()
-                self._selected = None
-        elif is_touched: # if finger moved
-            selected = self._selected
-            if hasattr(selected, '_update_coord_'):
                 selected._update_coord_(adjust_phys_to_rel(selected, coord))
         else:
             pass

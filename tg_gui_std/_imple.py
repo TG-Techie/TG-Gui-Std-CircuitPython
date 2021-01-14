@@ -45,9 +45,10 @@ _DEBUG_FILE = True
 if not _DEBUG_FILE:
     Group = displayio.Group
 else:
+
     class Group(displayio.Group):
 
-        max_size  = property(lambda self: self._max_size)
+        max_size = property(lambda self: self._max_size)
 
         def __init__(self, max_size=10, owner=None, **kwargs):
             super().__init__(max_size=max_size, **kwargs)
@@ -56,34 +57,28 @@ else:
 
         def __repr__(self):
             owner = self._owner
-            owner_str = ' '+repr(owner) if owner is not None else ''
+            owner_str = " " + repr(owner) if owner is not None else ""
             return f"<Group ({self._max_size}){owner_str}>"
 
-        def str_children(self):
+        def _repr_with_children(self):
             return f"<Group ({self._max_size}){[self[index] for index in range(len(self))]}>"
 
         def append(self, wid):
             if _DEBUG_FILE and False:
-                print('group.append', wid)
+                print("group.append", wid)
             super().append(wid)
 
-        @classmethod
-        def forwidget(cls, wid:Widget, max_size):
-            assert wid.isplaced()
-
-            return cls(
-                max_size=max_size,
-                owner=wid,
-                x=0, y=0,
-                #x=wid._rel_x_,
-                #y=wid._rel_y_
-            )
 
 class Label(displayio.Group):
-
-    def __init__(self, *,
-        coord, dims, alignment=align.center,
-        text='<text>', color=0xffffff, scale=1
+    def __init__(
+        self,
+        *,
+        coord,
+        dims,
+        alignment=align.center,
+        text="<text>",
+        color=0xFFFFFF,
+        scale=1
     ):
         super().__init__(
             max_size=1,
@@ -91,22 +86,17 @@ class Label(displayio.Group):
             y=coord[1],
         )
 
-        # print(align, align.leading, align.center, align.trailing, alignment)
-
         self._coord = coord
         self._dims = dims
 
-        self._text=text
+        self._text = text
         self._scale = scale
         self._color = color
         self._alignment = alignment
 
         self.append(displayio.Group())
-        #self._new_native()
-        self._native = Dispio_Label(
-            terminalio.FONT,
-            text=' '
-        )
+        # self._new_native()
+        self._native = Dispio_Label(terminalio.FONT, text=" ")
 
     @property
     def color(self):
@@ -122,18 +112,16 @@ class Label(displayio.Group):
         return self._text
 
     @text.setter
-    # #@micropython.native
     def text(self, value):
 
         if len(value) <= len(self._text):
-            # self[0]._text = value
-            # self._text = value
             self._text = value
             self._native._update_text(value)
             self._position_native()
         else:
             self._text = value
-            #self._new_native()
+
+            # make new native display group item
             self._native = native = Dispio_Label(
                 terminalio.FONT,
                 text=self._text,
@@ -141,27 +129,29 @@ class Label(displayio.Group):
                 color=self._color,
             )
             self._position_native()
+            # swap out for the new one (relies on being the last more item)
             self.pop(0)
             self.append(native)
 
-    # #@micropython.native
     def _position_native(self):
         global align
         width, height = self._dims
         native = self._native
         alignment = self._alignment
-        native.y = height//2
+        native.y = height // 2
         if alignment is align.center:
-            native.x = (width//2) - (self._scale*native.bounding_box[2]//2)
+            native.x = (width // 2) - (self._scale * native.bounding_box[2] // 2)
         elif alignment is align.leading:
             native.x = 0
         elif alignment is align.trailing:
-            native.x = width - (self._scale*native.bounding_box[2])
+            native.x = width - (self._scale * native.bounding_box[2])
         else:
-            raise ValueError(f"{alignment} is not a valid value, must be `align.center`, `align.leading`, or `align.trailing`")
+            raise ValueError(
+                f"{alignment} is not a valid value, must be `align.center`, `align.leading`, or `align.trailing`"
+            )
 
-    # #@micropython.native
     def _new_native(self):
+        # TODO: no longer used, consider removing
         self._native = native = Dispio_Label(
             terminalio.FONT,
             text=self._text,
