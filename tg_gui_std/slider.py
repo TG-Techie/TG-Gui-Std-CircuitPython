@@ -28,9 +28,10 @@ from . import _imple as imple
 
 
 class Slider(Widget):
-    def __init__(self, *, state, palette=None, _debug=False, **kwargs):
+    def __init__(self, *, value, palette=None, _debug=False, **kwargs):
         super().__init__(**kwargs)
-        self._state = state  # the state object to update
+        self._state = value  # the state object to update
+        assert isinstance(value, State)
         self._palette = palette
 
         self._debug = _debug
