@@ -78,7 +78,7 @@ class Label(displayio.Group):
         alignment=align.center,
         text="<text>",
         color=0xFFFFFF,
-        scale=1
+        scale=1,
     ):
         super().__init__(
             max_size=1,
@@ -97,6 +97,9 @@ class Label(displayio.Group):
         self.append(displayio.Group())
         # self._new_native()
         self._native = Dispio_Label(terminalio.FONT, text=" ")
+
+    # @property
+    # def bound_size
 
     @property
     def color(self):
@@ -140,7 +143,9 @@ class Label(displayio.Group):
         alignment = self._alignment
         native.y = height // 2
         if alignment is align.center:
-            native.x = (width // 2) - (self._scale * native.bounding_box[2] // 2)
+            native.x = (width // 2) - (
+                self._scale * native.bounding_box[2] // 2
+            )
         elif alignment is align.leading:
             native.x = 0
         elif alignment is align.trailing:

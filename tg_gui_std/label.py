@@ -26,7 +26,13 @@ from . import _imple as imple
 
 class Label(Widget):
     def __init__(
-        self, *, text, size=None, palette=None, _alignment=align.center, **kwargs
+        self,
+        *,
+        text,
+        size=None,
+        palette=None,
+        _alignment=align.center,
+        **kwargs,
     ):
         super().__init__(**kwargs)
         self._text_src = text
@@ -52,7 +58,7 @@ class Label(Widget):
         super()._place_(coord, dims)
 
         self._group = group = imple.Label(
-            text=" ",
+            text="___",
             color=self._palette.text_color,
             coord=self._rel_coord_,
             dims=self._phys_dims_,
@@ -65,9 +71,12 @@ class Label(Widget):
         super()._render_()
 
     def _update_text(self):
-        self._group.text = src_to_value(
+        text = src_to_value(
             src=self._text_src,
             widget=self,
             handler=self._update_text,
-            default=" ",
+            default=self._text_src,
         )
+        if len(text) == 1:
+            text = f" {text} "
+        self._group.text = text

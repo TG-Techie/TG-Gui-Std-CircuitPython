@@ -41,11 +41,15 @@ class Button(Widget):
         palette=None,
         radius=None,
         _alignment=align.center,
-        **kwargs
+        _y_adj=0,
+        _x_adj=0,
+        **kwargs,
     ):
         super().__init__(**kwargs)
 
         self._radius_src = radius
+        self._y_adj = _y_adj
+        self._x_adj = _x_adj
 
         self._text_src = text
         self._alignment = _alignment
@@ -71,8 +75,8 @@ class Button(Widget):
         super()._place_(coord, dims)
 
         press = self._press
-        if isinstance(press, MethodSpecifier):
-            self._press = press.getmethod(self)
+        if isinstance(press, AttributeSpecifier):
+            self._press = press.get_attribute(self)
 
         size = self._size
         if size is None:
@@ -82,7 +86,7 @@ class Button(Widget):
         if radius is None:
             radius = self._screen_.default.radius
         if isinstance(radius, DimensionSpecifier):
-            radius = radius._calc_dim_()
+            radius = radius._calc_dim_(self)
 
         radius = min(radius, self.width // 2, self.height // 2)
 
@@ -92,12 +96,12 @@ class Button(Widget):
         self._label = label = imple.Label(
             text=" ",
             color=0xFFFFFF,
-            coord=self._rel_coord_,
+            coord=(self._rel_x_ + self._x_adj, self._rel_y_ + self._y_adj),
             dims=self._phys_dims_,
             alignment=self._alignment,
             scale=size,
         )
-
+        self._update_text()
         group.append(rect)
         group.append(label)
 
@@ -107,15 +111,24 @@ class Button(Widget):
         super()._render_()
 
     def _update_text(self):
-        self._label.text = src_to_value(
+        text = src_to_value(
             src=self._text_src,
             widget=self,
             handler=self._update_text,
             default=" ",
         )
+        # hot patch
+        if len(text) == 1:
+            text = f" {text} "
+        # print(self, repr(text))
+        self._label.text = text
 
     def _update_colors(self):
         selected = self._selected_
         palette = self._palette
-        self._rect.fill = palette.selected_fill if selected else palette.fill_color
-        self._label.color = palette.selected_text if selected else palette.text_color
+        self._rect.fill = (
+            palette.selected_fill if selected else palette.fill_color
+        )
+        self._label.color = (
+            palette.selected_text if selected else palette.text_color
+        )

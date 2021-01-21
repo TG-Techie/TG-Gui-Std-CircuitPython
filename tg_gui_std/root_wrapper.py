@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 
 from ._imple import *
+from tg_gui_core.pages import Pages
 
 
 class DisplayioScreen(Screen):
@@ -29,6 +30,7 @@ class DisplayioScreen(Screen):
 
     def __init__(self, *, display, **kwargs):
         self._display_ = display
+        self._root_ = None
         if not isinstance(display, displayio.Display):
             raise TypeError(
                 f"screen must be of type 'Display', found '{type(self).__name__}'"
@@ -63,15 +65,27 @@ class DisplayioScreen(Screen):
     def on_container_place(_, wid: Widget):
         if hasattr(wid, "_nest_count_override"):
             wid._group = Group(
-                x=wid._rel_x_, y=wid._rel_y_, max_size=max(wid._nest_count_override)
+                x=wid._rel_x_,
+                y=wid._rel_y_,
+                max_size=max(wid._nest_count_override),
             )
         else:
             wid._group = Group(
                 x=wid._rel_x_, y=wid._rel_y_, max_size=max(1, len(wid._nested_))
             )
+        wid._screen_._root_.refresh_whole()
 
     def on_container_pickup(_, wid: Widget):
         wid._group = None
+
+    def on_container_render(_, wid: Widget):
+        if isinstance(wid, Pages):
+            wid._screen_._root_.refresh_whole()
+
+    def on_container_derender(_, wid: Widget):
+        pass
+        # if isinstance(wid, Pages):
+        #     wid._screen_._root_.refresh_whole()
 
 
 class DisplayioRootWrapper(RootWrapper):
@@ -88,4 +102,15 @@ class DisplayioRootWrapper(RootWrapper):
         super().__init__(screen=screen, **kwargs)
 
         self._group = group = Group(max_size=1)  # only has one child
-        self._display.show(group)
+
+        screen._root_ = self
+
+    def _std_startup_(self):
+        super()._std_startup_()
+        self._display.show(self._group)
+        self.refresh_whole()
+
+    def refresh_whole(self):
+        self._display.show(None)
+        self._display.show(self._group)
+        self._display.refresh()
