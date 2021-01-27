@@ -42,7 +42,7 @@ class Rect(Widget):
 
         self._radius = min(radius, self.width // 2, self.height // 2)
 
-        self._group = imple.RoundRect(
+        self._group = imple.LightRoundRect(
             *self._rel_placement_,
             r=self._radius,
         )

@@ -26,6 +26,7 @@
 import gc
 import displayio
 import terminalio
+import math
 
 from tg_gui_core import *
 
@@ -67,6 +68,44 @@ else:
             if _DEBUG_FILE and False:
                 print("group.append", wid)
             super().append(wid)
+
+
+class LightRoundRect(displayio.TileGrid):  # displayio.Group):
+    def __init__(self, x, y, width, height, r=0, fill=0xFF0000):
+
+        r = min(r, width // 2, height // 2)
+        p = displayio.Palette(2)
+        s = displayio.Shape(width, height)  # , mirror_x=True, mirror_y=True)
+        super().__init__(s, pixel_shader=p, x=x, y=y)
+
+        p.make_transparent(0)
+        # p.make_opaque(1)
+        p[1] = fill
+
+        self._palette = p
+        self._shape = s
+        self._radius = r
+
+        self._x = x
+        self._y = y
+        self._width = width
+        self._height = height
+
+        # apply the radius
+        rsqrd = r ** 2
+        for rowy in range(0, r):
+            indent = r - round(math.sqrt(rsqrd - (rowy - r) ** 2))
+            right_indent = width - indent - 1
+            s.set_boundary(rowy, indent, right_indent)
+            s.set_boundary(height - rowy - 1, indent, right_indent)
+
+    @property
+    def fill(self):
+        return self._palette[1]
+
+    @fill.setter
+    def fill(self, value: int):
+        self._palette[1] = value
 
 
 class Label(displayio.Group):
@@ -143,9 +182,7 @@ class Label(displayio.Group):
         alignment = self._alignment
         native.y = height // 2
         if alignment is align.center:
-            native.x = (width // 2) - (
-                self._scale * native.bounding_box[2] // 2
-            )
+            native.x = (width // 2) - (self._scale * native.bounding_box[2] // 2)
         elif alignment is align.leading:
             native.x = 0
         elif alignment is align.trailing:

@@ -40,7 +40,7 @@ class Slider(Widget):
         self._started_in_limits = None
         self._selected = False
 
-    _selected_ = property(lambda self: self._selected)
+    # _selected_ = property(lambda self: self._selected)
 
     def _on_nest_(self):
         if self._palette is None:
@@ -101,7 +101,7 @@ class Slider(Widget):
             )
             group.append(mark)
 
-    def _select_(self, coord):
+    def _start_coord_(self, coord):
         # TODO: ADD EXPLANATION
         self._initial_position = init_pos = self._position
         knob_dim = self._knob_dim
@@ -115,7 +115,7 @@ class Slider(Widget):
         if self._debug:
             self._mark.x = xmin
 
-    def _deselect_(self, coord):
+    def _last_coord_(self, coord):
         self._selected = False
 
     def _update_coord_(self, coord):

@@ -29,6 +29,15 @@ def adjust_phys_to_rel(ref_wid, coord):
     return (x - px, y - py)
 
 
+# #@micropython.native
+def has_phys_coord_in(widget, coord, _print=False):
+    #
+    minx, miny = widget._phys_coord_
+    x, y = coord
+    maxx, maxy = widget._phys_end_coord
+    return (minx <= x <= maxx) and (miny <= y <= maxy)
+
+
 class SinglePointEventLoop:
     def __init__(self, *, screen, update_coord):
         self._update_coord = update_coord
@@ -37,8 +46,10 @@ class SinglePointEventLoop:
         # initial state of the loop
         self._was_touched = False
         self._last_coord = (-0x1701D, -0x1701D)  # ;-)
+
         self._selected = None
-        self._supports_updating = False
+        self._found_pressable = None
+        self._found_updateable = None
 
     def loop(self):
 
@@ -49,37 +60,58 @@ class SinglePointEventLoop:
         # get current data
         coord = self._update_coord()
         is_touched = bool(coord is not None)
+        # if is_touched:
+        #   print(coord)
 
         if is_touched and not was_touched:  # if finger down
-            # print('event_loop', coord)
+            #
             # scan thought all pointable widgets
-            for widget in self._screen._pressables_:
+
+            screen = self._screen
+            for widget in screen._selectbles_:
                 # if the point being touched is a in the widget
-                if widget._has_phys_coord_in_(coord):
-                    # then select teh widget
-                    widget._select_(adjust_phys_to_rel(widget, coord))
-                    # save this widget for the next
+                if has_phys_coord_in(widget, coord):
+
+                    widget._select_()
                     self._selected = widget
-                    self._supports_updating = hasattr(widget, "_update_coord_")
                     break
+
+            for widget in screen._pressables_:
+                if has_phys_coord_in(widget, coord):
+
+                    self._found_pressable = widget
+                    break
+
+            for widget in screen._updateables_:
+                if has_phys_coord_in(widget, coord, _print=True):
+
+                    widget._start_coord_(adjust_phys_to_rel(widget, coord))
+                    self._found_updateable = widget
+                    break
+
         elif not is_touched and was_touched:  # if finger raised
-            selected = self._selected
-            # if an item is selected
-            if selected is not None:
-                # than deselect it
-                selected._deselect_(adjust_phys_to_rel(selected, last_coord))
-                # if the widget can be pressed, press it
-                if selected._has_phys_coord_in_(last_coord) and hasattr(
-                    selected, "_press_"
-                ):
-                    selected._press_()
-                # remove the reference to it
+
+            if self._selected is not None:
+
+                self._selected._deselect_()
                 self._selected = None
-                self._supports_updating = False
-        elif is_touched and self._supports_updating:  # than update it
-            selected = self._selected
-            if selected is not None:
-                selected._update_coord_(adjust_phys_to_rel(selected, coord))
+
+            if self._found_pressable is not None:
+
+                self._found_pressable._press_()
+                self._found_pressable = None
+
+            updateable = self._found_updateable
+            if updateable is not None:
+
+                updateable._last_coord_(
+                    adjust_phys_to_rel(updateable, self._last_coord)
+                )
+                self._found_updateable = None
+        elif is_touched:  # and self._found_updateable is not None:
+            updateable = self._found_updateable
+            if updateable is not None:
+                updateable._update_coord_(adjust_phys_to_rel(updateable, coord))
         else:
             pass
 

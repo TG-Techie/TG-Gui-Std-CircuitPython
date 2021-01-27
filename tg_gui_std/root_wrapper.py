@@ -22,6 +22,7 @@
 
 from ._imple import *
 from tg_gui_core.pages import Pages
+import gc
 
 
 class DisplayioScreen(Screen):
@@ -37,11 +38,17 @@ class DisplayioScreen(Screen):
             )
         super().__init__(**kwargs)
 
+        self._selectbles_ = []
         self._pressables_ = []
+        self._updateables_ = []
 
     def on_widget_nest_in(_, wid: Widget):
         if not hasattr(wid, "_group"):
             wid._group = None
+
+    def on_widget_unnest_from(_, wid: Widget):
+        if hasattr(wid, "_group"):
+            del wid._group
 
     def on_widget_render(self, wid: Widget):
         if wid._group is not None:
@@ -50,7 +57,13 @@ class DisplayioScreen(Screen):
             wid._superior_._group.append(group)
 
         if hasattr(wid, "_selected_"):
+            self._selectbles_.append(wid)
+        if hasattr(wid, "_press_"):
             self._pressables_.append(wid)
+        if hasattr(wid, "_update_coord_"):
+            self._updateables_.append(
+                wid,
+            )
 
     def on_widget_derender(self, wid: Widget):
         if wid._group is None:
@@ -58,9 +71,14 @@ class DisplayioScreen(Screen):
         while wid._group in wid._superior_._group:
             wid._superior_._group.remove(wid._group)
 
-        pressables = self._pressables_
-        if wid in pressables:
-            pressables.remove(wid)
+        if wid in self._selectbles_:
+            self._selectbles_.remove(wid)
+
+        if wid in self._pressables_:
+            self._pressables_.remove(wid)
+
+        if wid in self._updateables_:
+            self._updateables_.remove(wid)
 
     def on_container_place(_, wid: Widget):
         if hasattr(wid, "_nest_count_override"):
@@ -71,7 +89,12 @@ class DisplayioScreen(Screen):
             )
         else:
             wid._group = Group(
-                x=wid._rel_x_, y=wid._rel_y_, max_size=max(1, len(wid._nested_))
+                x=wid._rel_x_,
+                y=wid._rel_y_,
+                max_size=max(
+                    1,
+                    len(wid._nested_),
+                ),
             )
         wid._screen_._root_.refresh_whole()
 
@@ -90,7 +113,7 @@ class DisplayioScreen(Screen):
 
 class DisplayioRootWrapper(RootWrapper):
     def __init__(self, *, display, screen, **kwargs):
-        assert isinstance(display, displayio.Display)
+        # assert isinstance(display, displayio.Display)
         self._display = display
         display.auto_refresh = False
 
@@ -102,15 +125,15 @@ class DisplayioRootWrapper(RootWrapper):
         super().__init__(screen=screen, **kwargs)
 
         self._group = group = Group(max_size=1)  # only has one child
-
+        self.refresh_whole = lambda: None
         screen._root_ = self
 
     def _std_startup_(self):
         super()._std_startup_()
         self._display.show(self._group)
-        self.refresh_whole()
+        self.refresh_whole = self._refresh_whole
 
-    def refresh_whole(self):
+    def _refresh_whole(self):
         self._display.show(None)
         self._display.show(self._group)
         self._display.refresh()
