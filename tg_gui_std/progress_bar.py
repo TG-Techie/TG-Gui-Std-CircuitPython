@@ -29,7 +29,7 @@ class ProgressBar(Widget):
         super().__init__(**kwargs)
 
         self._fill_space = _fill_space
-        self._prog_src = progress
+        self._progress_state = progress
         self._palette = None
 
     def _on_nest_(self):
@@ -65,10 +65,14 @@ class ProgressBar(Widget):
         self._update_progress()
         super()._render_()
 
+    def _derender_(self):
+        unlink_from_src(widget=self, src=self._progress_state)
+        super()._derender_()
+
     def _update_progress(self):
         if self.isplaced():
             value = src_to_value(
-                src=self._prog_src,
+                src=self._progress_state,
                 widget=self,
                 handler=self._update_progress,
                 default=0.0,

@@ -48,6 +48,9 @@ if not _DEBUG_FILE:
 else:
 
     class Group(displayio.Group):
+        def __del__(self):
+            print("delling", self)
+            super().__del__()
 
         max_size = property(lambda self: self._max_size)
 

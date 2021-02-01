@@ -28,7 +28,7 @@ class Rect(Widget):
     def __init__(self, radius=None, fill=None, **kwargs):
         super().__init__(**kwargs)
 
-        self._fill_src = fill
+        self._fill_state = fill
         self._radius_src = radius
 
     def _place_(self, coord, dims):
@@ -47,12 +47,16 @@ class Rect(Widget):
             r=self._radius,
         )
 
+    def _pickup_(self):
+        unlink_from_src(widget=self, src=self._fill_state)
+        super()._pickup_()
+
     def _render_(self):
         self._update_color()
         super()._render_()
 
     def _update_color(self):
-        fill = self._fill_src
+        fill = self._fill_state
 
         if fill is None:
             fill = self._screen_.default._fill_color_

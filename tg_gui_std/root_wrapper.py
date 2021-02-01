@@ -67,18 +67,25 @@ class DisplayioScreen(Screen):
 
     def on_widget_derender(self, wid: Widget):
         if wid._group is None:
-            return
-        while wid._group in wid._superior_._group:
+            pass
+            # while wid._group in wid._superior_._group:
+        else:
             wid._superior_._group.remove(wid._group)
 
         if wid in self._selectbles_:
             self._selectbles_.remove(wid)
+        if wid in self._selectbles_:
+            raise RuntimeError(f"double _selectbles_ error {wid}")
 
         if wid in self._pressables_:
             self._pressables_.remove(wid)
+        if wid in self._pressables_:
+            raise RuntimeError(f"double _pressables_ error {wid}")
 
         if wid in self._updateables_:
             self._updateables_.remove(wid)
+        if wid in self._updateables_:
+            raise RuntimeError(f"double _updateables_ error {wid}")
 
     def on_container_place(_, wid: Widget):
         if hasattr(wid, "_nest_count_override"):
@@ -99,6 +106,7 @@ class DisplayioScreen(Screen):
         wid._screen_._root_.refresh_whole()
 
     def on_container_pickup(_, wid: Widget):
+        del wid._group
         wid._group = None
 
     def on_container_render(_, wid: Widget):

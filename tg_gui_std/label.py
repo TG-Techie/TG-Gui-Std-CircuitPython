@@ -35,10 +35,14 @@ class Label(Widget):
         **kwargs,
     ):
         super().__init__(**kwargs)
-        self._text_src = text
+        self._text_state = text
         self._alignment = _alignment
         self._palette = palette
         self._size = size
+
+    def _pickup_(self):
+        unlink_from_src(widget=self, src=self._text_state)
+        super()._pickup_()
 
     def _on_nest_(self):
         """
@@ -72,10 +76,10 @@ class Label(Widget):
 
     def _update_text(self):
         text = src_to_value(
-            src=self._text_src,
+            src=self._text_state,
             widget=self,
             handler=self._update_text,
-            default=self._text_src,
+            default=self._text_state,
         )
         if len(text) == 1:
             text = f" {text} "
