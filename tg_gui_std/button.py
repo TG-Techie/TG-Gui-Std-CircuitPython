@@ -48,12 +48,16 @@ class Button(Widget):
         self._y_adj = _y_adj
         self._x_adj = _x_adj
 
-        self._text_src = text
+        self._text_state = text
         self._alignment = _alignment
         self._size = size
 
-        self._press_ = press
+        self._press_spec = press
         self._palette = palette
+
+    def _pickup_(self):
+        unlink_from_src(widget=self, src=self._text_state)
+        super()._pickup_()
 
     def _select_(self):
         self._selected_ = True
@@ -67,13 +71,17 @@ class Button(Widget):
         if palette is None:
             self._palette = screen.palettes.primary
 
+        press_spec = self._press_spec
+        if isinstance(press_spec, AttributeSpecifier):
+            self._press_ = press_spec._get_attribute_(self)
+        elif isinstance(press_spec, ForwardMethodCall):
+            self._press_ = press_spec._get_method_(self)
+        else:
+            self._press_ = press_spec
+
     def _place_(self, coord, dims):
         global imple
         super()._place_(coord, dims)
-
-        press = self._press_
-        if isinstance(press, AttributeSpecifier):
-            self._press_ = press.get_attribute(self)
 
         size = self._size
         if size is None:
@@ -111,7 +119,7 @@ class Button(Widget):
 
     def _update_text(self):
         text = src_to_value(
-            src=self._text_src,
+            src=self._text_state,
             widget=self,
             handler=self._update_text,
             default=" ",
