@@ -81,6 +81,6 @@ class Label(Widget):
             handler=self._update_text,
             default=self._text_state,
         )
-        if len(text) == 1:
-            text = f" {text} "
+        if len(text) <= 3:
+            text = f"  {text}  "
         self._group.text = text
