@@ -59,25 +59,36 @@ class Slider(Widget):
         if knob_dim is None:
             knob_dim = screen.min_size
 
-        self._group = group = imple.Group(x=rx, y=ry, max_size=(3 if debug else 2))
+        self._group = group = imple.Group(x=rx, y=ry, max_size=(4 if debug else 3))
 
         self._bar = bar = imple.ProgressBar(
             0, rh // 2 - 6, rw, 12, stroke=0, bar_color=self._palette.fill_color
         )
 
-        self._knob = knob = imple.RoundRect(
+        self._knob_outline = knob_outline = imple.LightRoundRect(
             0,
             rh // 2 - knob_dim // 2,
             width=knob_dim,
             height=knob_dim,
             r=screen.default.radius,
+            fill=color.gray,
+            # stroke=knob_dim // 10,
+            # outline=color.gray,
+        )
+
+        self._stroke = stroke = knob_dim // 10
+        self._knob_fill = knob_fill = imple.LightRoundRect(
+            stroke,
+            (rh // 2 - knob_dim // 2) + stroke,
+            width=knob_dim - 2 * stroke,
+            height=knob_dim - 2 * stroke,
+            r=screen.default.radius - stroke,
             fill=color.lightgray,
-            stroke=knob_dim // 10,
-            outline=color.gray,
         )
 
         group.append(bar)
-        group.append(knob)
+        group.append(knob_outline)
+        group.append(knob_fill)
 
         self._knob_dim = knob_dim
         self._span = value_range = rw - knob_dim
@@ -131,12 +142,13 @@ class Slider(Widget):
         prev_pos = self._pos_on_prev_update
         if abs(prev_pos - new_pos) > 3:  # only update when moved 3 + pixels
 
-            knob = self._knob
-            bar = self._bar
+            # knob = self._knob
+            # bar = self._bar
 
             self._state.update(value)
             self._value = value
 
-            knob.x = new_pos
-            bar.progress = value
+            self._knob_outline.x = new_pos
+            self._knob_fill.x = new_pos + self._stroke
+            self._bar.progress = value
             self._pos_on_prev_update = new_pos

@@ -25,6 +25,7 @@
 
 import gc
 import displayio
+import vectorio
 import terminalio
 import math
 
@@ -109,6 +110,92 @@ class LightRoundRect(displayio.TileGrid):  # displayio.Group):
     @fill.setter
     def fill(self, value: int):
         self._palette[1] = value
+
+
+# class LightRoundRect(displayio.Group):
+#     def __init__(self, x, y, width, height, radius=0, fill=0xFF0000):
+#         radius = min(radius, width // 2, height // 2)
+#         p = displayio.Palette(2)
+#         s = displayio.Shape(width, height)  # , mirror_x=True, mirror_y=True)
+#         super().__init__(x=x, y=y, max_size=6)
+#
+#         p.make_transparent(0)
+#         # p.make_opaque(1)
+#         p[1] = fill
+#
+#         self._palette = p
+#         self._radius = radius
+#
+#         self._x = x
+#         self._y = y
+#         self._width = width
+#         self._height = height
+#
+#         right_rad_x = width - radius
+#         bottom_rad_y = height - radius
+#
+#         # is_slot = bool(r*2 >= min(width, height))
+#
+#         self._top_left = top_left = vectorio.VectorShape(
+#             shape=vectorio.Circle(r),
+#             pixel_shader=p,
+#             x=radius,
+#             y=radius,
+#         )
+#
+#         self._top_right = top_right = vectorio.VectorShape(
+#             shape=vectorio.Circle(r),
+#             pixel_shader=p,
+#             x=right_rad_x,
+#             y=radius,
+#         )
+#
+#         self._bottom_left = bottom_left = vectorio.VectorShape(
+#             shape=vectorio.Circle(r),
+#             pixel_shader=p,
+#             x=radius,
+#             y=bottom_rad_y,
+#         )
+#
+#         self._bottom_right = bottom_right = vectorio.VectorShape(
+#             shape=vectorio.Circle(r),
+#             pixel_shader=p,
+#             x=right_rad_x,
+#             y=bottom_rad_y,
+#         )
+#
+#         w = width - 2 * r
+#         if w > 0:
+#             self._veritcal_fill = vfill = vectorio.VectorShape(
+#                 shape=vectorio.Rectangle(w, height),
+#                 pixel_shader=p,
+#                 x=radius,
+#                 y=0,
+#             )
+#             self.append(vfill)
+#
+#         h = height - 2 * r
+#         if h > 0:
+#             self._horizontal_fill = hfill = vectorio.VectorShape(
+#                 shape=vectorio.Rectangle(width, h),
+#                 pixel_shader=p,
+#                 x=0,
+#                 y=radius,
+#             )
+#             self.append(hfill)
+#
+#         self.append(top_left)
+#         self.append(top_right)
+#         self.append(bottom_left)
+#         self.append(bottom_right)
+#
+#     @property
+#     def fill(self) -> int:
+#         return self._palette[1]
+#
+#     @fill.setter
+#     def fill(self, value: int):
+#         self._palette[1] = value
 
 
 class Label(displayio.Group):
